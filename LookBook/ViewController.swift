@@ -4,6 +4,7 @@
 //
 //  Created by Janice Flint on 4/9/22.
 //
+//
 
 import UIKit
 import AudioToolbox
@@ -22,10 +23,16 @@ class ViewController: UIViewController {
     @IBOutlet var bio: UITextView!
     @IBOutlet var bioAnimate: UITextView!
     
+    @IBOutlet var notes: UITextView!
+    @IBOutlet var notesAnimate: UITextView!
+    
     var deck = [NSDictionary]()
 //    var include = [String]()
     var dateModified = Date()
     var deckPosition = 0
+    // Decided to create separate include array, like tha AirportTLA
+    // since was not able to get to work in the deck dictionaries
+    var include = [NSString] ()
 
     var deckOrder = [Int]()
     
@@ -37,7 +44,7 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.initializeDeck()
+ //       self.initializeDeck()
         let swipeRight = UISwipeGestureRecognizer(target: self, action: #selector(self.respondToSwipeGesture))
         swipeRight.direction = UISwipeGestureRecognizer.Direction.right
         self.view.addGestureRecognizer(swipeRight)
@@ -65,9 +72,13 @@ class ViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        self.initializeDeck()
         self.shuffleDeck()
         deckPosition = 0
-        
+        while include[deckOrder[deckPosition]] == "No" {
+            deckPosition += 1
+        }
+
         let personInfo = deck[deckOrder[deckPosition]] as! [String:String]
         let personName = personInfo["formalName"]
         let personPosition = personInfo["title"]
@@ -103,8 +114,7 @@ class ViewController: UIViewController {
                          if self.deckPosition == -1 {
                             self.deckPosition = deck.count - 1
                         }
-                        personInfo = deck[deckOrder[deckPosition]] as! [String:String]
-                    } while personInfo["include"] == "No"
+                    } while include[deckOrder[deckPosition]] == "No"
                     self.swipeCard(swipeDirection: "swipedRight")
                     
                 case UISwipeGestureRecognizer.Direction.down:
@@ -118,8 +128,7 @@ class ViewController: UIViewController {
                         if deckPosition == deck.count {
                             deckPosition = 0
                         }
-                        personInfo = deck[deckOrder[deckPosition]] as! [String:String]
-                    } while personInfo["include"] == "No"
+                    } while include[deckOrder[deckPosition]] == "No"
                     self.swipeCard(swipeDirection: "swipedLeft")
 
                 case UISwipeGestureRecognizer.Direction.up:
@@ -197,6 +206,7 @@ class ViewController: UIViewController {
     func initializeDeck() {
             deck = UserDefaults.standard.array(forKey: "deck") as! Array
             dateModified = UserDefaults.standard.object(forKey: "dateModified") as! Date
+        include = UserDefaults.standard.array(forKey: "include") as! [NSString]
             print("Deck",deck)
         }
 
@@ -209,6 +219,7 @@ class ViewController: UIViewController {
         }
         
         // Assign a Position for each card in Deck
+        deckOrder = [Int]()
         var newPosition = 0
         var positionFound = false
         for _ in 1...deck.count {
@@ -223,6 +234,7 @@ class ViewController: UIViewController {
                 }
             }
         }
+        print(deckOrder)
     }
 
 }
